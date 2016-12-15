@@ -1,0 +1,18 @@
+{
+  "name": "consentz",
+  "license": "BSD-2-Clause",
+  "moduleType": [],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "materialize": "^0.97.8"
+  },
+  "resolutions": {
+    "jquery": "~3.1.0"
+  }
+}
