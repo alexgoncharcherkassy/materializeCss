@@ -1,5 +1,5 @@
 {
-  "name": "js-lesson",
+  "name": "materializeCss",
   "dependencies": {
     "bower": "~1.7.9",
     "clean-css": "^3.4.18",
