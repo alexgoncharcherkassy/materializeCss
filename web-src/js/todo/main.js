@@ -14,8 +14,31 @@ $(document).ready(function () {
     var buttonAction = $('#action');
     var selectTodo = $('#select-todo');
     var amountDiv = $('#amount-div');
+    var dragSrcEl = null;
     selectTodo.hide();
     amountDiv.hide();
+
+    function handleDragStart(e) {
+        this.style.opacity = '0.4';
+
+        dragSrcEl = this;
+
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/html', this.innerHTML);
+    }
+
+    function handleDrop(e) {
+        if (e.stopPropagation) {
+            e.stopPropagation();
+        }
+
+        if (dragSrcEl != this) {
+            dragSrcEl.innerHTML = this.innerHTML;
+            this.innerHTML = e.dataTransfer.getData('text/html');
+        }
+
+        return false;
+    }
 
     function saveToStorage(items, storageName) {
         myStorage.setItem(storageName, JSON.stringify(items));
@@ -27,7 +50,7 @@ $(document).ready(function () {
     }
 
     function createItem(item) {
-        selectTodo.find('ul').append($('<li>').addClass('collection-item')
+        selectTodo.find('ul').append($('<li>').addClass('collection-item').attr('id', 'id' + item.id).attr('draggable', true)
             .append($('<input>').attr('type', 'checkbox').attr('id', item.id).attr('checked', item.status))
             .append($('<label>').attr('for', item.id).text(item.field))
             .append($('<button>').attr('type', 'button').addClass('btn-floating btn waves-effect waves-light red delete-button disabled')
@@ -154,4 +177,9 @@ $(document).ready(function () {
     });
 
     renderFromStorage(storageName);
+
+    // var items = $('#select-todo').find('ul>li');
+    // [].forEach.call(items, function(item) {
+    //     item.addEventListener('dragstart', handleDragStart, false);
+    // });
 });
