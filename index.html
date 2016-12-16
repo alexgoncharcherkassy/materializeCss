@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>test materialize</title>
+    <title>Test materialize</title>
     <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link type="text/css" rel="stylesheet" href="web/css/app.css"  media="screen,projection"/>
 </head>
@@ -14,24 +14,17 @@
             <div class="row">
 
                 <div class="input-field col s12">
-                    <input id="textDo" type="text" class="validate" length="30">
-                    <label for="textDo">What need do</label>
+                    <input id="textDo" type="text" class="validate" length="30" autocomplete="off">
+                    <label for="textDo">What need do?</label>
                 </div>
                 <button class="btn-floating btn waves-effect waves-light red action-button disabled" type="button" id="action">
                     <i class="material-icons">add</i>
                 </button>
-                <div class="input-field col s12" id="select-todo" hidden>
-                    <ul class="collection">
-                        <!--<li class="collection-item">Alvin</li>-->
-                        <!--<li class="collection-item">Alvin</li>-->
-                        <!--<li class="collection-item">Alvin</li>-->
-                        <!--<li class="collection-item">Alvin</li>-->
-                    </ul>
-                    <!--<select multiple>-->
-                        <!--<option value="1">Option 1</option>-->
-                        <!--<option value="2">Option 2</option>-->
-                        <!--<option value="3">Option 3</option>-->
-                    <!--</select>-->
+                <div class="col s12" id="select-todo" hidden>
+                    <ul class="collection"></ul>
+                </div>
+                <div class="col s12" id="amount-div" hidden>
+                    <ul class="collection"></ul>
                 </div>
             </div>
         </div>
@@ -42,29 +35,150 @@
 <script type="text/javascript" src="web/js/app.js"></script>
 <script>
     $(document).ready(function(){
-//        $('select').material_select();
         $('.character-counter').hide();
+
+        var Item = {
+            id: String,
+            field: String,
+            status: Boolean
+        };
+        var items = [];
+        var id = 0;
+        var myStorage = localStorage;
         var inputDo = $('#textDo');
         var buttonAction = $('#action');
         var selectTodo = $('#select-todo');
-//        function checkInputs(e) {
-//            if (e.keyCode == '13') {
-//                buttonAction.trigger('click');
-//            }
-//            inputDo.val() ? buttonAction.removeClass('disabled') : buttonAction.addClass('disabled');
-//            inputDo.val() ? selectTodo.show() : selectTodo.hide();
-//        }
+        var amountDiv = $('#amount-div');
+
+        function saveToStorage(items) {
+            myStorage.setItem('storage', JSON.stringify(items));
+        }
+
+        function getFromStorage() {
+            items = JSON.parse(myStorage.getItem('storage'));
+            return items ? items : [];
+        }
+
+        function createItem(item) {
+            selectTodo.find('ul').append($('<li>').addClass('collection-item')
+                    .append($('<input>').attr('type', 'checkbox').attr('id', item.id).attr('checked', item.status))
+                    .append($('<label>').attr('for', item.id).text(item.field))
+                    .append($('<button>').attr('type', 'button').addClass('btn-floating btn waves-effect waves-light red delete-button').append($('<i>').addClass('material-icons').text('remove')))
+            );
+
+            var li = selectTodo.find('ul>li').last();
+            var input = li.find('input');
+            var button = li.find('button');
+            input.change(function (e) {
+                var label = $("label[for='"+input.attr('id')+"']");
+                if (input.prop('checked')) {
+                    label.addClass('selected-label');
+                    setStatus(input.attr('id'), true);
+                } else {
+                    label.removeClass('selected-label');
+                    setStatus(input.attr('id'), false);
+                }
+            });
+            button.click(function (e) {
+                remove(input.attr('id'));
+                button.parent().remove();
+            });
+        }
+
+        function renderFromStorage() {
+            items = getFromStorage();
+            if (items) {
+                items.forEach(function (val) {
+                    createItem(val);
+                });
+                renderAmount();
+            }
+        }
+
+        function renderAmount() {
+            var count = countSelected();
+
+            if (count) {
+                if (!amountDiv.find('ul>li').length) {
+                    amountDiv.find('ul').append($('<li>').addClass('collection-item').text('All item(s): ' + selectTodo.find('ul>li').length + ' Select item(s): ' + count));
+                } else {
+                    amountDiv.find('ul>li').text('All item(s): ' + selectTodo.find('ul>li').length + ' Select item(s): ' + count);
+                }
+                amountDiv.show();
+            }
+            if (!count) {
+                amountDiv.hide();
+            }
+        }
+
+        function countSelected() {
+            var count = 0;
+            items.forEach(function (elem) {
+                if (elem.status) {
+                    count++;
+                }
+            });
+
+            return count;
+        }
+
+        function setStatus(id, status) {
+            ind = items.findIndex(function (el) {
+                if (id == el.id) {
+                    return true;
+                }
+
+                return false;
+            });
+            var obj = items[ind];
+            obj.status = status;
+            saveToStorage(items);
+            renderAmount();
+        }
+
+        function remove(id) {
+            ind = items.findIndex(function (el) {
+                if (id == el.id) {
+                    return true;
+                }
+
+                return false;
+            });
+            items.splice(ind, 1);
+            renderAmount();
+            saveToStorage(items);
+        }
+
         inputDo.keyup(function (e) {
             if (e.keyCode == '13') {
                 buttonAction.trigger('click');
             }
             inputDo.val() ? buttonAction.removeClass('disabled') : buttonAction.addClass('disabled');
-            inputDo.val() ? selectTodo.show() : selectTodo.hide();
         });
+
+        inputDo.focusin(function () {
+            selectTodo.find('ul').children().length ?  selectTodo.show() : selectTodo.hide();
+        });
+
+//        inputDo.focusout(function () {
+//            selectTodo.hide();
+//        });
+
         buttonAction.click(function () {
-//            selectTodo.find('ul').append($('<li>').addClass('collection-item').append($('<input>').attr('type', 'checkbox').attr('id', '1')).append($('label').attr('for', '1').text(inputDo.val())));
-            selectTodo.find('ul').append($('<li>').addClass('collection-item').text(inputDo.val()));
+            if ((inputDo.val() && inputDo.val().length <= 30)) {
+                item = Object.create(Item);
+                item.id = Date.now();
+                item.field = inputDo.val();
+                item.status = false;
+                items.push(item);
+                inputDo.val(null);
+                saveToStorage(items);
+                createItem(item);
+                inputDo.trigger('focusin');
+            }
         });
+
+        renderFromStorage();
     });
 </script>
 </body>
