@@ -9,7 +9,7 @@ $(document).ready(function () {
     var items = [];
     var id = 0;
     var myStorage = localStorage;
-    var storageName = 'storage';
+    var storageName = 'storage1';
     var inputDo = $('#textDo');
     var buttonAction = $('#action');
     var selectTodo = $('#select-todo');
@@ -130,7 +130,7 @@ $(document).ready(function () {
         });
         var obj = items[ind];
         obj.status = status;
-        saveToStorage(items, 'storage');
+        saveToStorage(items, storageName);
         renderAmount();
     }
 
